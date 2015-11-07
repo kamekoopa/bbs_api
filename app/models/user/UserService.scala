@@ -11,4 +11,8 @@ class UserService {
   def findUserById(id: Int): Errors\/User = {
     userRepo.findById(id)
   }
+
+  def createUser(ucr: UserCreationRequest): Errors\/User = {
+    userRepo.createUser(ucr)
+  }
 }

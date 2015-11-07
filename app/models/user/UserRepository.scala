@@ -7,4 +7,6 @@ import scalaz._
 trait UserRepository {
 
   def findById(id: Int): Errors\/User
+
+  def createUser(ucr: UserCreationRequest): Errors\/User
 }

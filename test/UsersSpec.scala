@@ -15,12 +15,32 @@ class UsersSpec extends Specification {
   val createRequest = FakeRequest(POST, "/api/users")
   val searchRequest = (id: Int) => FakeRequest(GET, s"/api/users/$id")
 
+  abstract class WithoutUsers(app: Application = FakeApplication()) extends WithApplication(app) {
+
+    override def around[T](t: => T)(implicit evidence$2: AsResult[T]): Result = super.around {
+
+      try {
+        DB localTx { implicit sess =>
+          sql"""delete from users""".update().apply()
+        }
+
+        t
+
+      }finally {
+        DB localTx { implicit sess =>
+          sql"""delete from users""".update().apply()
+        }
+      }
+    }
+  }
+
   abstract class WithUsers(app: Application = FakeApplication()) extends WithApplication(app) {
 
     override def around[T](t: => T)(implicit evidence$2: AsResult[T]): Result = super.around {
 
       try {
         DB localTx { implicit sess =>
+          sql"""delete from users""".update().apply()
           sql"""insert into users(id, username, password, email, salt) values (1, 'username', 'password12','test@example.com', 'salt')"""
             .update().apply()
         }
@@ -95,7 +115,7 @@ class UsersSpec extends Specification {
       status(resultFuture) must equalTo(BAD_REQUEST)
     }
 
-    "ユーザ作成APIはユーザが作成されると202で作成されたユーザの情報を返す" in new WithApplication {
+    "ユーザ作成APIはユーザが作成されると202で作成されたユーザの情報を返す" in new WithoutUsers {
 
       val payload = Json.obj(
         "username" -> "username",
@@ -113,7 +133,7 @@ class UsersSpec extends Specification {
       (created \ "email").as[String] must equalTo("test@example.com")
     }
 
-    "ユーザ取得APIは404を返す" in new WithApplication {
+    "ユーザ取得APIは404を返す" in new WithoutUsers {
 
       val resultFuture = route(searchRequest(1)).get
 

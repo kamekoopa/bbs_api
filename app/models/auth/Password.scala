@@ -1,11 +1,5 @@
 package models.auth
 
-case class Password(hashedPassword: String) {
+case class Password(hashedPassword: String, salt: String) {
 
-}
-
-object Password {
-  def apply(rawPasswordString: String, salt: String): Password = {
-    new Password("test")
-  }
 }
