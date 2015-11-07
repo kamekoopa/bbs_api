@@ -1,20 +1,22 @@
 package controllers
 
-import models.user.UserRepositoryOnRDB
+import models.user.UserService
+import infra.json.ReadsWrites._
 import play.api.libs.concurrent.Execution.Implicits._
+import play.api.libs.json.Json._
 import play.api.mvc.{Action, Controller}
-import play.api.http.Writeable._
 
 import scala.concurrent.Future
 
 class Users extends Controller {
 
-  val userRepo = new UserRepositoryOnRDB()
+  val userService = new UserService()
 
   def findById(id: Int) = Action.async {
 
     Future {
-      userRepo.findById(id).fold(err => NotFound(err.message), user => Ok(user.username))
+      val userV = userService.findUserById(id)
+      userV.fold(_.toResult,  user => Ok(toJson(user)))
     }
   }
 }

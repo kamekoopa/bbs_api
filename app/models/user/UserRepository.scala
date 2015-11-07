@@ -1,10 +1,10 @@
 package models.user
 
-import models.ui.ResourceNotFound
+import models.ui.Errors
 
 import scalaz._
 
 trait UserRepository {
 
-  def findById(id: Int): ResourceNotFound\/User
+  def findById(id: Int): Errors\/User
 }
