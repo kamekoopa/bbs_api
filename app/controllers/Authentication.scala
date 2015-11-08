@@ -15,18 +15,21 @@ import services.AuthService
 
 import scala.concurrent.Future
 
-class Authentication @Inject() (cacheApi: CacheApi, config: Configuration) extends Controller {
+class Authentication @Inject() (cacheApi: CacheApi, config: Configuration) extends Controller with Logging {
 
   val authService = new AuthService(new UserRepositoryOnRDB(), cacheApi, config)
 
   def authenticate = Action.async(parse.json) { req =>
     Future {
-      val tokenV = for {
-        authReq <- AuthRequest.from(req.body)
-        token <- authService.authenticate(authReq)
-      } yield token
 
-      tokenV.fold(_.toResult,  token => Created(Json.obj("token" -> token.token)))
+      withRequestLogging(req){ req =>
+        val tokenV = for {
+          authReq <- AuthRequest.from(req.body)
+          token <- authService.authenticate(authReq)
+        } yield token
+
+        tokenV.fold(_.toResult,  token => Created(Json.obj("token" -> token.token)))
+      }
     }
   }
 }
