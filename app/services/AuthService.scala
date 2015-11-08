@@ -1,8 +1,9 @@
-package models.auth
+package services
 
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
+import models.auth.{AccessToken, AuthRequest, Password}
 import models.ui.{Errors, ResourceNotFound, UnAuthError}
 import models.user.{UserRepository, UserRepositoryOnRDB}
 import play.api.Configuration
@@ -11,9 +12,7 @@ import play.api.cache.CacheApi
 import scala.concurrent.duration.Duration
 import scalaz.{-\/, \/, \/-}
 
-class AuthService(val cacheApi: CacheApi, val config: Configuration) {
-
-  val userRepo: UserRepository = new UserRepositoryOnRDB
+class AuthService(val userRepo: UserRepository, val cacheApi: CacheApi, val config: Configuration) {
 
   def authenticate(authReq: AuthRequest): Errors\/AccessToken = {
 
