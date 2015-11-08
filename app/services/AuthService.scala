@@ -52,7 +52,7 @@ class AuthService(val userRepo: UserRepository, val cacheApi: CacheApi, val conf
     )
     val token = new AccessToken(new Date().getTime.toString)
 
-    cacheApi.set(s"auth.${user.username}", token.token, expiration)
+    cacheApi.set(s"auth.${token.token}", user.id, expiration)
 
     token
   }
