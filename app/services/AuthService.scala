@@ -3,11 +3,13 @@ package services
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
+import infra.db.TxBoundaries._
 import models.auth.{AccessToken, AuthRequest, Password}
 import models.ui.{Errors, ResourceNotFound, UnAuthError}
-import models.user.{UserRepository, UserRepositoryOnRDB}
+import models.user.{User, UserRepository}
 import play.api.Configuration
 import play.api.cache.CacheApi
+import scalikejdbc._
 
 import scala.concurrent.duration.Duration
 import scalaz.{-\/, \/, \/-}
@@ -16,33 +18,42 @@ class AuthService(val userRepo: UserRepository, val cacheApi: CacheApi, val conf
 
   def authenticate(authReq: AuthRequest): Errors\/AccessToken = {
 
-    val user = for {
-      user <- userRepo.findByName(authReq.username)
-    } yield user
-
     lazy val authError = UnAuthError("invalid username or password")
 
-    user
-      .leftMap({
-        case ResourceNotFound(_) => authError
-        case other => other
-      })
-      .flatMap({user =>
-        val specifiedPassword = Password.create(authReq.rawpassword, user.email)
-        if (user.password == specifiedPassword) {
+    DB.localTx { implicit sess =>
 
-          val expiration = Duration(
-            config.getMilliseconds("app.authExpiration").getOrElse(TimeUnit.HOURS.toMillis(24L)),
-            TimeUnit.MILLISECONDS
-          )
-          val token = new Date().getTime.toString
+      val user = for {
+        user <- userRepo.findByName(authReq.username)
+      } yield user
 
-          cacheApi.set(s"auth.${user.username}", token, expiration)
-          \/-(new AccessToken(token))
+      user
+        .leftMap({
+          case ResourceNotFound(_) => authError
+          case other => other
+        })
+        .flatMap({ user =>
 
-        } else {
-          -\/(authError)
-        }
-      })
+          val specifiedPassword = Password.create(authReq.rawpassword, user.email)
+
+          if (user.password == specifiedPassword) {
+            \/-(setToken(user))
+          } else {
+            -\/(authError)
+          }
+        })
+    }
+  }
+
+  private def setToken(user: User): AccessToken = {
+
+    val expiration = Duration(
+      config.getMilliseconds("app.authExpiration").getOrElse(TimeUnit.HOURS.toMillis(24L)),
+      TimeUnit.MILLISECONDS
+    )
+    val token = new AccessToken(new Date().getTime.toString)
+
+    cacheApi.set(s"auth.${user.username}", token.token, expiration)
+
+    token
   }
 }
