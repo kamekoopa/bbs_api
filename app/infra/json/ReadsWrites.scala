@@ -1,14 +1,20 @@
 package infra.json
 
+import models.auth.AuthRequest
 import models.ui._
-import models.user.{UserCreationRequest, User}
-import play.api.libs.json._
-import play.api.libs.json.Json._
-import play.jsonext.CaseClassWrites
-import play.api.libs.json.Reads._
+import models.user.{User, UserCreationRequest}
 import play.api.libs.functional.syntax._
+import play.api.libs.json.Json._
+import play.api.libs.json.Reads._
+import play.api.libs.json._
+import play.jsonext.CaseClassWrites
 
 object ReadsWrites {
+
+  implicit val _authRequest = (
+    (JsPath \ "username").read[String] and
+    (JsPath \ "password").read[String]
+  )(AuthRequest.apply _)
 
   implicit val _userCreationReq = (
     (JsPath \ "username").read[String](maxLength[String](10)) and
@@ -36,6 +42,10 @@ object ReadsWrites {
         case e: InvalidParameter =>
           Json.obj(
             "errors" -> toJson(e.errors)
+          )
+        case e: UnAuthError =>
+          Json.obj(
+            "message" -> e.message
           )
         case e: ResourceNotFound =>
           Json.obj(

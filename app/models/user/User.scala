@@ -1,17 +1,17 @@
 package models.user
 
 import models.auth.Password
-import models.ui.{InvalidParameter, ParamError, Errors}
-import play.api.libs.json.{JsError, JsSuccess, Reads, JsValue}
+import models.ui.{Errors, InvalidParameter, ParamError}
+import play.api.libs.json.{JsError, JsSuccess, JsValue, Reads}
 
-import scalaz.{-\/, \/-, \/}
+import scalaz.{-\/, \/, \/-}
 
 case class UserCreationRequest(username: String, email: String, password: Password)
 
 object UserCreationRequest {
 
   def create(username: String, email: String, rawPassword: String): UserCreationRequest = {
-    UserCreationRequest(username, email, Password(rawPassword, email))
+    UserCreationRequest(username, email, Password.create(rawPassword, email))
   }
 
   def from(json: JsValue)(implicit ev: Reads[UserCreationRequest]): Errors\/UserCreationRequest = {

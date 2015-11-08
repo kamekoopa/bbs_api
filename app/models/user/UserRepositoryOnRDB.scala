@@ -1,12 +1,11 @@
 package models.user
 
 import models.auth.Password
-import models.ui.{ResourceConflict, InternalServerError, Errors, ResourceNotFound}
+import models.ui.{Errors, InternalServerError, ResourceConflict, ResourceNotFound}
+import scalikejdbc.TxBoundary.Try._
 import scalikejdbc._
-import TxBoundary.Try._
-import scala.util.Try
-import scala.util.Failure
-import scala.util.Success
+
+import scala.util.{Failure, Success, Try}
 import scalaz._
 
 class UserRepositoryOnRDB extends UserRepository {
@@ -20,6 +19,19 @@ class UserRepositoryOnRDB extends UserRepository {
     userTryOpt match {
       case Failure(e)          => -\/(InternalServerError(e.getMessage))
       case Success(None)       => -\/(ResourceNotFound(s"specified id: $id was not found"))
+      case Success(Some(user)) => \/-(user)
+    }
+  }
+
+  def findByName(name: String): Errors\/User = {
+
+    val userTryOpt = DB localTx { implicit sess =>
+      selectByName(name)
+    }
+
+    userTryOpt match {
+      case Failure(e)          => -\/(InternalServerError(e.getMessage))
+      case Success(None)       => -\/(ResourceNotFound(s"specified id: $name was not found"))
       case Success(Some(user)) => \/-(user)
     }
   }
