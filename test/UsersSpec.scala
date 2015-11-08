@@ -115,7 +115,7 @@ class UsersSpec extends Specification {
       status(resultFuture) must equalTo(BAD_REQUEST)
     }
 
-    "ユーザ作成APIはユーザが作成されると202で作成されたユーザの情報を返す" in new WithoutUsers {
+    "ユーザ作成APIはユーザが作成されると201で作成されたユーザの情報を返す" in new WithoutUsers {
 
       val payload = Json.obj(
         "username" -> "username",
@@ -125,7 +125,7 @@ class UsersSpec extends Specification {
 
       val resultFuture = route(createRequest.withJsonBody(payload)).get
 
-      status(resultFuture) must equalTo(ACCEPTED)
+      status(resultFuture) must equalTo(CREATED)
 
       val created = contentAsJson(resultFuture)
       (created \ "id").asOpt[Int] must beSome

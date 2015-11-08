@@ -28,7 +28,7 @@ class Users extends Controller {
         user <- userService.createUser(ucr)
       } yield user
 
-      userV.fold(_.toResult,  user => Accepted(toJson(user)))
+      userV.fold(_.toResult,  user => Created(toJson(user)))
     }
   }
 }
