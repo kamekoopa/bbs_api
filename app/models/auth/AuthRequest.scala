@@ -1,9 +1,9 @@
 package models.auth
 
-import models.ui.{InvalidParameter, ParamError, Errors}
-import play.api.libs.json.{JsError, JsSuccess, Reads, JsValue}
+import models.ui.{Errors, InvalidParameter, ParamError}
+import play.api.libs.json.{JsError, JsSuccess, JsValue, Reads}
 
-import scalaz.{-\/, \/-, \/}
+import scalaz.{-\/, \/, \/-}
 
 case class AuthRequest(username: String, rawpassword: String) {
 

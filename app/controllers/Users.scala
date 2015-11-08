@@ -1,7 +1,7 @@
 package controllers
 
-import models.user.{UserRepositoryOnRDB, UserCreationRequest}
 import infra.json.ReadsWrites._
+import models.user.{UserCreationRequest, UserRepositoryOnRDB}
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.Json._
 import play.api.mvc.{Action, Controller}

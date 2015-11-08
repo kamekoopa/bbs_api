@@ -2,7 +2,7 @@ package infra.db
 
 import scalikejdbc.{Tx, TxBoundary}
 
-import scalaz.{\/-, -\/, \/}
+import scalaz.{-\/, \/, \/-}
 
 object TxBoundaries {
 
