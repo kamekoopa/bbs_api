@@ -1,13 +1,14 @@
 package infra.json
 
 import models.auth.AuthRequest
+import models.post.{Tag, ThreadCreationRequest}
 import models.ui._
 import models.user.{User, UserCreationRequest}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Json._
 import play.api.libs.json.Reads._
 import play.api.libs.json._
-import play.jsonext.CaseClassWrites
+import play.jsonext.{CaseClassReads, CaseClassWrites}
 
 object ReadsWrites {
 
@@ -31,6 +32,18 @@ object ReadsWrites {
       )
     }
   }
+
+  implicit val _threadCreationRequest = CaseClassReads(ThreadCreationRequest.apply _)(
+    "title", "tagNames", "token"
+  )
+
+  implicit val _tag = CaseClassWrites(Tag.unapply _)(
+    "id", "name"
+  )
+
+  implicit val _thread = CaseClassWrites(models.post.Thread.unapply _)(
+    "id", "title", "createdBy", "createdAt", "lastPostedAt", "tags"
+  )
 
   implicit val _paramError = CaseClassWrites(ParamError.unapply _)(
     "paramName", "message"

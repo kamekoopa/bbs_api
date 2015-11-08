@@ -44,6 +44,22 @@ class AuthService(val userRepo: UserRepository, val cacheApi: CacheApi, val conf
     }
   }
 
+  def getAuthorizedUser(token: AccessToken): Errors\/User = {
+
+    lazy val unAuth = -\/(UnAuthError("unauthorized"))
+
+    cacheApi
+      .get[Int](s"auth.${token.token}")
+      .fold[Errors\/User](unAuth){ userId =>
+
+        userRepo.findById(userId) match {
+          case -\/(ResourceNotFound(_)) => unAuth
+          case l @ -\/(_)               => l
+          case r @ \/-(_)               => r
+        }
+      }
+  }
+
   private def setToken(user: User): AccessToken = {
 
     val expiration = Duration(
