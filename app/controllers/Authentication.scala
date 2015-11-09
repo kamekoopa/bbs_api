@@ -2,6 +2,7 @@ package controllers
 
 import javax.inject.Inject
 
+import infra.json.DeSerializeUtils
 import infra.json.ReadsWrites._
 import models.auth.AuthRequest
 import models.user.UserRepositoryOnRDB
@@ -24,7 +25,7 @@ class Authentication @Inject() (cacheApi: CacheApi, config: Configuration) exten
 
       withRequestLogging(req){ req =>
         val tokenV = for {
-          authReq <- AuthRequest.from(req.body)
+          authReq <- DeSerializeUtils.from[AuthRequest](req.body)
           token <- authService.authenticate(authReq)
         } yield token
 

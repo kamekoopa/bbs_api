@@ -1,5 +1,6 @@
 package controllers
 
+import infra.json.DeSerializeUtils
 import infra.json.ReadsWrites._
 import models.user.{UserCreationRequest, UserRepositoryOnRDB}
 import play.api.libs.concurrent.Execution.Implicits._
@@ -27,7 +28,7 @@ class Users extends Controller with Logging {
     Future {
       withRequestLogging(req){ req =>
         val userV = for {
-          ucr <- UserCreationRequest.from(req.body)
+          ucr <- DeSerializeUtils.from[UserCreationRequest](req.body)
           user <- userService.createUser(ucr)
         } yield user
 

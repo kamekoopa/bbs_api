@@ -2,6 +2,7 @@ package controllers
 
 import javax.inject.Inject
 
+import infra.json.DeSerializeUtils
 import infra.json.ReadsWrites._
 import models.post.{ThreadCreationRequest, ThreadRepositoryOnRDB}
 import models.user.UserRepositoryOnRDB
@@ -23,7 +24,7 @@ class Threads @Inject() (cacheApi: CacheApi, config: Configuration) extends Cont
     Future {
       withRequestLogging(req){ req =>
         val threadV = for {
-          tcr <- ThreadCreationRequest.from(req.body)
+          tcr <- DeSerializeUtils.from[ThreadCreationRequest](req.body)
           user <- authService.getAuthorizedUser(tcr.accessToken)
           thread <- threadService.createNewThread(tcr.title, user, tcr.tagNames)
         } yield thread
