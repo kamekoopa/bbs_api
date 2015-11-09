@@ -1,11 +1,11 @@
 package services
 
-import models.post.ThreadRepository
+import infra.db.TxBoundaries._
+import models.post.{Thread => Th, ThreadRepository}
 import models.ui.Errors
 import models.user.User
-import models.post.{Thread => Th}
 import scalikejdbc._
-import infra.db.TxBoundaries._
+
 import scalaz.\/
 
 class ThreadService(val threadRepo: ThreadRepository) {
