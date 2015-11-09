@@ -4,7 +4,7 @@ CREATE TABLE threads (
   created_by INT NOT NULL,
   created_at DATE NOT NULL,
   last_posted_at DATE DEFAULT NULL,
-  FOREIGN KEY (created_at) REFERENCES users(id)
+  FOREIGN KEY (created_by) REFERENCES users(id)
 );
 ALTER TABLE threads ADD CONSTRAINT threads_pk PRIMARY KEY (id);
 
